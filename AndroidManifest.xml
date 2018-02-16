@@ -11,18 +11,11 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="Random Student"
         android:supportsRtl="true"
         android:theme="@style/AppThemeWithActionBar">
-        <activity
-            android:name=".SetupScreen"
-            android:parentActivityName=".displayStudents">
-            <intent-filter>
-               <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".displayStudents"
             android:label="@string/title_activity_display_students"
@@ -30,6 +23,14 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.VIEW"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SetupScreen"
+            android:parentActivityName=".displayStudents">
+            <intent-filter>
+               <action android:name="android.intent.action.Setup" />
             </intent-filter>
         </activity>
     </application>
