@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppThemeWithActionBar">
         <activity
-            android:name=".displayStudents"
+            android:name=".DisplayStudents"
             android:label="@string/title_activity_display_students"
             android:theme="@style/AppThemeWithActionBar">
             <intent-filter>
@@ -28,7 +28,7 @@
         </activity>
         <activity
             android:name=".SetupScreen"
-            android:parentActivityName=".displayStudents">
+            android:parentActivityName=".DisplayStudents">
             <intent-filter>
                <action android:name="android.intent.action.Setup" />
             </intent-filter>
