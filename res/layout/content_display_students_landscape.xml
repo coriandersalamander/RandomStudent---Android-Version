@@ -68,6 +68,7 @@
             android:layout_below="@+id/myCardView"
             android:paddingBottom="16dp"
             android:paddingTop="16dp"
+
             android:text="@string/for_debugging_string"
             android:textAlignment="center" />
 
