@@ -7,7 +7,7 @@
     android:background="@color/colorPrimaryDark"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.lapharcius.randomstudent.displayStudents"
-    tools:showIn="@layout/activity_display_students_landscape">
+    tools:showIn="@layout/activity_display_students_portrait">
 
         <Spinner
             android:id="@+id/spinner"
@@ -20,6 +20,7 @@
             android:layout_marginTop="16dp"
             android:dropDownSelector="?android:attr/textColorLink"
             android:foregroundGravity="bottom"
+            android:saveEnabled="true"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp" />
 
@@ -38,25 +39,20 @@
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp" />
 
-
         <ListView
             android:id="@+id/myListView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-
             android:layout_below="@+id/spinner"
             android:layout_marginBottom="40dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="40dp"
             android:background="@color/colorListView"
             android:divider="?android:attr/actionModeSplitBackground"
             android:dividerHeight="@dimen/cardview_default_radius"
             android:fadingEdge="horizontal|vertical"
-
-            android:paddingBottom="@dimen/cardview_default_radius"
-            android:paddingEnd="@dimen/cardview_default_radius"
-            android:paddingStart="@dimen/cardview_default_radius"
-
+            android:footerDividersEnabled="false"
+            android:headerDividersEnabled="false"
             android:theme="@style/Animation.AppCompat.DropDownUp"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="11dp" />
@@ -66,8 +62,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/myCardView"
-            android:paddingBottom="16dp"
-            android:paddingTop="16dp"
             android:text="@string/for_debugging_string"
             android:textAlignment="center" />
 
@@ -84,8 +78,8 @@
 
         <android.support.v7.widget.CardView
             android:id="@+id/myCardView"
-            android:layout_width="match_parent"
-            android:layout_height="90dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:layout_alignBottom="@+id/myListView"
             android:layout_alignParentTop="false"
             android:layout_alignTop="@+id/myListView"

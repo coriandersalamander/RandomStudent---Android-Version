@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_GoogleLogin"
+            android:icon="@android:drawable/presence_online"
+            android:enabled="false"
+            android:title="@string/googleLoginString" />
+        <item
+            android:id="@+id/nav_GoogleLogout"
+            android:icon="@android:drawable/presence_offline"
+            android:enabled="false"
+            android:title="@string/googleLogoutString" />
+    </group>
+
+    <item
+        android:id="@+id/nav_deleteDB"
+        android:icon="@android:drawable/ic_delete"
+        android:enabled="false"
+        android:title="@string/deleteDatabaseString" />
+</menu>
