@@ -16,14 +16,19 @@ public class NetworkReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         ConnectivityManager conn = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = conn.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            Log.i("LOGMESSAGE", "Network Connected!");
+        NetworkInfo networkInfo;
+        if (conn != null) {
+            networkInfo = conn.getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.isConnected()) {
+                Log.i("LOGMESSAGE", "Network Connected!");
+            } else {
+                Log.i("LOGMESSAGE", "Network Not Connected!");
+
+            }
         }
         else
         {
             Log.i("LOGMESSAGE", "Network Not Connected!");
-
         }
     }
 }

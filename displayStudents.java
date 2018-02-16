@@ -1,8 +1,6 @@
 package com.lapharcius.randomstudent;
 
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,15 +10,9 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.text.Layout;
-import android.text.SpannableString;
-import android.text.style.AlignmentSpan;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,14 +20,12 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -83,8 +73,8 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
     };
     private static final String PREF_ACCOUNT_NAME = "accountName";
 
-    Vector<String> periods;
-    Map<String, String> gridIds;
+    static Vector<String> periods;
+    static Map<String, String> gridIds;
 
     static List<String> savedOutput;
     ListView savedListView;
@@ -111,23 +101,14 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
         g = new FlingDetector(getApplicationContext());
 
         Intent i = getIntent();
-/*        if (i.getAction() == Intent.ACTION_MAIN)
+
+        if ((Intent.ACTION_MAIN.equals(i.getAction()) &&
+            studentsDatabase.getInstance(getApplicationContext()).countItems() == 0))
         {
-            Log.i("LOGMESSAGE", "In Launch Mode");
-        }
-        else {
-            Log.i("LOGMESSAGE", "Started by MainActivity");
-        }
-*/
-        if ((studentsDatabase.getInstance(getApplicationContext()).countItems() == 0) &&
-                (i.getAction() == Intent.ACTION_MAIN)) {
-            // If this is an initial launch, and there are no database entries, launch the setup
-            // activity.
             Intent setupScreen = new Intent(getApplicationContext(), SetupScreen.class);
             startActivity(setupScreen);
         }
-        else
-        {
+        else {
             if (i.hasExtra("SpreadsheetId")) {
                 spreadsheetId = i.getStringExtra("SpreadsheetId");
                 Log.i("LOGMESSAGE", "Spreadsheet id == " + spreadsheetId);
@@ -143,9 +124,7 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
 
             if (i.hasExtra("loginName")) {
                 mCredential.setSelectedAccountName(i.getStringExtra("loginName"));
-            }
-            else
-            {
+            } else {
                 String accountName = getPreferences(Context.MODE_PRIVATE)
                         .getString(PREF_ACCOUNT_NAME, null);
 
@@ -154,7 +133,7 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
 
             mOutputText = (TextView) findViewById(R.id.outputText);
             l = (ListView) findViewById(R.id.myListView);
-//            l.setSelector(android.R.drawable.list_selector_background);
+            //            l.setSelector(android.R.drawable.list_selector_background);
             l.setSelector(android.R.drawable.star_big_on);
 
             c = (CardView) findViewById(R.id.myCardView);
@@ -167,15 +146,6 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
 
             setupFloatingButton();
 
-            Log.i("LOGMESSAGE", String.valueOf(i.getAction()));
-            if ((i.getAction() != Intent.ACTION_MAIN) &&
-                (savedInstanceState  == null)){
-                // This delete/create method calls seem correct to me. Why does this not work?
-                // Experiment: Try with "savedInstanceState == null" check.
-//                studentsDatabase.getInstance(this).deleteDatabase("students.db");
-//                studentsDatabase.getInstance(this).createDB();
-                populateDatabase();
-            }
 
             if (savedInstanceState != null) {
                 Log.i("LOGMESSAGE", String.valueOf(savedSpinnerPosition));
@@ -185,17 +155,29 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
                 ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
                 ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
                 ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
-            } else {
+            }
+            else if (!Intent.ACTION_MAIN.equals(i.getAction()))
+            {
+                // This delete/create method calls seem correct to me. Why does this not work?
+                // Experiment: Try with "savedInstanceState == null" check.
+//                        studentsDatabase.getInstance(this).deleteDatabase("students.db");
+//                        studentsDatabase.getInstance(this).createDB();
+                populateDatabase();
+            }
+            else
+            {
                 queryDatabase();
-/*                View headerView = getLayoutInflater().inflate(android.R.layout.simple_list_item_1,null);
-                l.addHeaderView(headerView);
-                l.addHeaderView(headerView);
+        /*                View headerView = getLayoutInflater().inflate(android.R.layout.simple_list_item_1,null);
+                        l.addHeaderView(headerView);
+                        l.addHeaderView(headerView);
 
-                l.addFooterView(headerView);
-                l.addFooterView(headerView);
-*/            }
+                        l.addFooterView(headerView);
+                        l.addFooterView(headerView);
+        */
+            }
         }
     }
+
     @Override
     public void onOptionsMenuClosed(Menu menu) {
         Log.i("LOGMESSAGE", "In onOptionsMenuClosed");
@@ -219,21 +201,24 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
                     try {
                         try {
                             final LayoutInflater menuItem = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                            final View menuView = menuItem.createView(name, null, attrs);
-                            new Handler().post(new Runnable() {
-                                public void run() {
-                                    try {
-                                        menuView.setBackgroundColor((Color.GRAY));
+                            if (menuItem != null)
+                            {
+                                final View menuView = menuItem.createView(name, null, attrs);
+                                new Handler().post(new Runnable() {
+                                    public void run() {
+                                        try {
+                                            menuView.setBackgroundColor((Color.GRAY));
 //                                        SpannableString s = new SpannableString(getResources().getString(R.string.set_up_new_roster));
 //                                        s.setSpan(new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER), 0, s.length(), 0);
 //                                        menuItem.set
 //                                        menuView.setBackgroundResource(android.R.drawable.star_big_on);
-                                    } catch (Exception e) {
-                                        Log.i("LOGMESSAGE", "Error Setting Text Color: " + e.getMessage());
+                                        } catch (Exception e) {
+                                            Log.i("LOGMESSAGE", "Error Setting Text Color: " + e.getMessage());
+                                        }
                                     }
-                                }
-                            });
-                            return menuView;
+                                });
+                                return menuView;
+                            }
                         } catch (InflateException e) {
                             Log.i("LOGMESSAGE", "View inflater error: " + e.getMessage());
                         }
@@ -280,13 +265,12 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
 
     @Override
     public void onBackPressed() {
-        Log.i("LOGMESSAGE", "Back button pressed!");
-//        Thread.dumpStack();
-//        super.onBackPressed();
-//        Snackbar bar = Snackbar.make((View) this, "Developed by Christopher J. Galasso", Snackbar.LENGTH_LONG);
-//        View v = bar.getView();
-//        v.setBackgroundColor(Color.rgb(242, 169, 0));
-//        bar.setAction("Action", null).show();
+        // This "moveTaskToBack" logic might be a bug. I don't like to modify Google/Android's
+        // default behavior, but for reasons I don't understand, Android calls OnDestroy when the
+        // back button is pressed. For every activity other than the main screen, I can understand
+        // this mentality. However, from the main screen, the back button should stick the app into
+        // the background.
+        moveTaskToBack(false);
 
     }
 
@@ -327,7 +311,7 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
 
                 spinning = !spinning;
                 if (!spinning) {
-                    c.setContentPadding(0,0, 0, 0);
+//                    c.setContentPadding(0,0, 0, 0);
                     f.setImageResource(R.mipmap.goicon);
                     countDown.cancel();
 //                    l.setFocusableInTouchMode(true);
@@ -338,7 +322,7 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
                     Log.i("LOGMESSAGE", "Stopped!");
 
                 } else {
-                    c.setContentPadding(0,150, 0, 150);
+                    c.setContentPadding(0,200, 0, 200);
                     f.setImageResource(R.mipmap.stopicon);
                     countDown.start();
                     Log.i("LOGMESSAGE", "Started!");
@@ -349,11 +333,12 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
     }
 
     private void populateDatabase() {
+        databaseUpdated = false;
         new MakeSheetsRequestTask(mCredential).execute();
     }
 
     private void queryDatabase() {
-        new MakeDatabaseRequestTask(0).execute();
+        new MakeDatabaseRequestTask(-1).execute();
     }
 
     @Override
@@ -376,15 +361,33 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
             super();
             while (!databaseUpdated)
             {
-                    try {
-                        sleep(5000);
-                        Log.i("LOGMESSAGE", "HEHE");
-                    } catch (InterruptedException e) {
-                        Log.i("LOGMESSAGE", "MakeDatabaseRequestTask Interrupted!");
-                    }
-//                }
+                try
+                {
+                    sleep(5000);
+                    Log.i("LOGMESSAGE", "Waiting for Sheets Request to Finish");
+                } catch (InterruptedException e)
+                {
+                    Log.i("LOGMESSAGE", "MakeDatabaseRequestTask Interrupted!");
+                }
             }
-            if (periods.isEmpty())
+/*
+            if (periods.size() != 0)
+
+            {
+                periods.clear();
+            }
+
+            if (gridIds.size() != 0)
+            {
+                gridIds.clear();
+            }
+*/
+            Cursor periodEntries = studentsDatabase.getInstance(getApplicationContext()).getPeriodEntries();
+            periodEntries.moveToFirst();
+            do {
+                periods.add(periodEntries.getString(0));
+            } while (periodEntries.moveToNext());
+            if (aPeriod == -1)
             {
                 period = "All";
             }
@@ -397,15 +400,25 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
         @Override
         protected List<String> doInBackground(Void... voids) {
             List<String> results = new ArrayList<>();
-            Cursor c = studentsDatabase.getInstance(getApplicationContext()).getEntries(period);
-            c.moveToFirst();
-            while (c.moveToNext()) {
-                int columnFirstName = c.getColumnIndex("firstname");
-                int columnLastName = c.getColumnIndex("lastname");
-                String studentName = c.getString(columnLastName) + ", " + c.getString(columnFirstName);
+            Cursor studentCursor;
+            if (period.equals("All"))
+            {
+                studentCursor = studentsDatabase.getInstance(getApplicationContext()).getAllEntries();
+            }
+            else
+            {
+                studentCursor = studentsDatabase.getInstance(getApplicationContext()).getEntries(period);
+            }
+            studentCursor.moveToFirst();
+
+            do {
+                int columnFirstName = studentCursor.getColumnIndex("firstname");
+                int columnLastName = studentCursor.getColumnIndex("lastname");
+                String studentName = studentCursor.getString(columnLastName) + ", " + studentCursor.getString(columnFirstName);
 
                 results.add(studentName);
-            }
+
+            } while (studentCursor.moveToNext());
 
             return results;
         }
@@ -415,24 +428,9 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
             super.onPreExecute();
             Spinner s = (Spinner) findViewById(R.id.spinner);
             s.setEnabled(false);
-            if (periods.size() != 0)
-            {
-                periods.clear();
-            }
-
-            if (gridIds.size() != 0)
-            {
-                gridIds.clear();
-            }
-
-            Cursor c = studentsDatabase.getInstance(getApplicationContext()).getPeriodEntries();
-            c.moveToFirst();
-            periods.add(c.getString(0));
-            while (c.moveToNext()) {
-                periods.add(c.getString(0));
-            }
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getApplicationContext(),
                     R.layout.spinner_dropdown_item, periods);
+
 
             s.setAdapter(spinnerAdapter);
         }
@@ -582,6 +580,15 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
             l = (ListView) findViewById(R.id.myListView);
             l.setAdapter(null);
             mOutputText.setText("");
+            if (periods.size() != 0)
+            {
+                periods.clear();
+            }
+
+            if (gridIds.size() != 0)
+            {
+                gridIds.clear();
+            }
         }
 
         @Override
@@ -592,23 +599,27 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
             l.setAdapter(listAdapter);
             savedOutput = new ArrayList<>(output);
 
-            Spinner spinner = (Spinner) findViewById(R.id.spinner);
+/*            for (String tempRow : output)
+            {
+                Log.i("LOGMESSAGE", tempRow);
+            }
+*/
 //            spinner.setEnabled(true);
 
+            Spinner spinner = (Spinner) findViewById(R.id.spinner);
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getApplicationContext(),
                     R.layout.spinner_dropdown_item, periods);
             spinner.setAdapter(spinnerAdapter);
+//            for (int i = 0; i < periods.size(); ++i) {
+//                Log.i("sheetresult", periods.elementAt(i) + "\n");
+//                if (output.size() == 0) {
+//                    mOutputText.setText(R.string.no_results_returned);
+//                } else {
+//                    output.add(0, "Data retrieved using the Sheets API:");
+//                    l = (ListView) findViewById(R.id.myListView);
 
-            for (int i = 0; i < periods.size(); ++i) {
-                Log.i("sheetresult", periods.elementAt(i) + "\n");
-                if (output.size() == 0) {
-                    mOutputText.setText(R.string.no_results_returned);
-                } else {
-                    output.add(0, "Data retrieved using the Sheets API:");
-                    l = (ListView) findViewById(R.id.myListView);
-
-                }
-            }
+//                }
+//            }
         }
 
         @SuppressWarnings("StatementWithEmptyBody")

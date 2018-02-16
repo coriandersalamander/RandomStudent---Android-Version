@@ -24,8 +24,8 @@ public class studentsDatabase extends ContextWrapper {
     {
         if (instance == null)
         {
-            Context mContext = base;
-            instance = new studentsDatabase(mContext);
+//            Context mContext = base;
+            instance = new studentsDatabase(base);
         }
 
         return instance;
@@ -76,7 +76,6 @@ public class studentsDatabase extends ContextWrapper {
             sqlString = "SELECT * FROM students";
         }
         Cursor cursor = database.rawQuery(sqlString, null);
-        Log.i("LOGMESSAGE" , "In studentsDatabase - count == " + cursor.getCount());
         int numItems = cursor.getCount();
         cursor.close();
 
@@ -116,46 +115,10 @@ public class studentsDatabase extends ContextWrapper {
 
     }
 
-    void populateDBWithTempValues(String aPeriod) {
-        //Grab from Drive and Insert
-        //
-/*
-
-        Log.i("LOGMESSAGE", "In populateDB");
-        String sql;
-        int numItems;
-
-        if (aPeriod.equals("ALL")) {
-            numItems = countItems();
-        } else {
-            numItems = countItems(aPeriod);
-
-        }
-
-        if (numItems == 0) {
-            String[] myName = {"Mickey Mouse", "Donald Duck", "Goofy"};
-            Integer period = 100;
-            for (String tempName : myName) {
-                sql = "INSERT INTO students(name, period) VALUES ('" + tempName + " " + "','" + period.toString() + "')";
-                database.execSQL(sql);
-            }
-        }
-
-*/
+    void populateDBWithTempValues(String aPeriod)
+    {
     }
     void populateDBWithSpreadsheet()
     {
-        //Grab from Drive and Insert
-        //
-
-        //                sql = "INSERT INTO students(name, period) VALUES ('" + tempName + " " + new Date().toString() + "','" + period + "')";
-        //        String sql;
-        //        sql = "INSERT INTO students(name, period) VALUES ('" + tempName + " " + "','" + period.toString() + "')";
-        //                period++;
-        //
-        //                Log.i("LOGMESSAGE", tempName);
-        //        database.execSQL(sql);
-
-
     }
 }

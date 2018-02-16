@@ -88,12 +88,10 @@ public class SetupScreen extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null)
-        {   Log.i("LOGMESSAGE", "blablldldlfllf");}
         setContentView(R.layout.activity_main);
         
         // First, let's register a BroadcastReceiver to track network connection changes.
-        // Since the data is mostly stored in a local database, we generally won't need
+        // Since the roster data is mostly stored in a local database, we generally won't need
         // internet other than when first setting up the data.
         
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -108,20 +106,6 @@ public class SetupScreen extends Activity
         // Used to show Exception text when debugging faulty logic.
         mExceptionText = (TextView) findViewById(R.id.outputText);
 
-//        database = studentsDatabase.getInstance(this);
-//        database.createDB();
-
-/*        if (database.countItems() != 0) {
-            Intent i = new Intent(MainActivity.this, displayStudents.class);
-            String fileName = getPreferences(Context.MODE_PRIVATE)
-                    .getString(PREF_FILE_NAME, null);
-            unregisterReceiver(networkChangeReceiver);
-
-            i.putExtra("fileName", fileName);
-            i.putExtra("loginName", mCredential.getSelectedAccountName());
-            startActivityForResult(i, REQUEST_DISPLAY_STUDENTS);
-        }
-*/
         if (savedInstanceState != null && mSavedFilenames != null)
         {
             // Add the previously saved filenames to our current ListView.
@@ -172,25 +156,12 @@ public class SetupScreen extends Activity
         setUpFloatingButton();
     }
 
-
-    @Override
-    public void onBackPressed() {
-        // This "moveTaskToBack" logic might be a bug. I don't like to modify Google/Android's
-        // default behavior, but for reasons I don't understand, Android calls OnDestroy when the
-        // back button is pressed. For every activity other than the main screen, I can understand
-        // this mentality. However, from the main screen, the back button should stick the app into
-        // the background.
-
-        moveTaskToBack(false);
-    }
-
     @Override
     protected void onPause() {
         // This is obvious, but we don't want to constantly listening for changes in network. This
         // could end up consuming resources. So, when paused, we unregister.
 
         super.onPause();
-        Log.i("LOGMESSAGE", "OnPause");
         savedListView = mFilenames;
         unregisterReceiver(networkChangeReceiver);
 
@@ -199,31 +170,14 @@ public class SetupScreen extends Activity
     @Override
     protected void onResume() {
 
-        // Again, we don't want to constantly listening for changes in network, which could end up
-        // consuming resources. So, when paused, we unregister. On resume, we reregister.
+        // We don't want to constantly listen for changes in network, which could end up
+        // consuming resources. So, when paused, we unregister. On resume, we re-register.
 
         super.onResume();
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         networkChangeReceiver = new NetworkReceiver();
         this.registerReceiver(networkChangeReceiver, filter);
         mFilenames = savedListView ;
-    }
-
-    @Override
-    protected void onDestroy() {
-        // Again, we don't want to constantly listening for changes in network, which could end up// consuming resources. So, when the activity is destroyed, we unregister. On create, we
-        // reregister.
-        //
-        // To do - I would like to modify this to ***not*** unregister when a change in orientation
-        // occurs. I don't know yet how to determine whether this onDestroy was called due to
-        // killing the app vs. a change in orientation.
-
-        // To fix this, perhaps I should unregister on onStop???
-        //
-        super.onDestroy();
-//        if (networkChangeReceiver != null){
-//            unregisterReceiver(networkChangeReceiver);
-//        }
     }
 
     @Override
@@ -353,15 +307,15 @@ public class SetupScreen extends Activity
     }
 
     void enableDrawerOptions() {
-        if (mCredential.getSelectedAccountName() != null) {
+        if (mCredential.getSelectedAccountName() != null ||
+            getPreferences(Context.MODE_PRIVATE).getString(PREF_ACCOUNT_NAME, null) != null)
+        {
             NavigationView n = (NavigationView) findViewById(R.id.nav_view);
             Menu m = n.getMenu();
             MenuItem mi = m.findItem(R.id.nav_GoogleLogin);
             mi.setEnabled(true);
             mi = m.findItem(R.id.nav_GoogleLogout);
             mi.setEnabled(true);
-//            mi = m.findItem(R.id.nav_GoogleLogin);
-//            mi.setEnabled(false);
             mi = m.findItem(R.id.nav_deleteDB);
             mi.setEnabled(true);
 
