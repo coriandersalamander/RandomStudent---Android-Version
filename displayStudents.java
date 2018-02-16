@@ -370,7 +370,7 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
                     Log.i("LOGMESSAGE", "MakeDatabaseRequestTask Interrupted!");
                 }
             }
-/*
+
             if (periods.size() != 0)
 
             {
@@ -381,7 +381,7 @@ public class displayStudents extends Activity implements FlingDetector.OnGesture
             {
                 gridIds.clear();
             }
-*/
+
             Cursor periodEntries = studentsDatabase.getInstance(getApplicationContext()).getPeriodEntries();
             periodEntries.moveToFirst();
             do {
