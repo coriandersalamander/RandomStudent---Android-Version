@@ -153,7 +153,7 @@ public class SetupScreen extends Activity
                 editor.putString(PREF_FILE_NAME, parent.getItemAtPosition(position).toString());
                 editor.apply();
 
-                Intent i = new Intent(SetupScreen.this, displayStudents.class);
+                Intent i = new Intent(SetupScreen.this, DisplayStudents.class);
 
                 i.putExtra("fileName", parent.getItemAtPosition(position).toString());
                 i.putExtra("SpreadsheetId", fileIds.get(position));
