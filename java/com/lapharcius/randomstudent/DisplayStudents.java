@@ -65,7 +65,6 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
     CardView c;
     ListView l;
 
-
     static int savedSpinnerPosition;
     static int savedListPosition;
     private static final String[] SCOPES = {
