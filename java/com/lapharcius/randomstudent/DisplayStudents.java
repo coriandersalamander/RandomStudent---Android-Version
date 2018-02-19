@@ -133,9 +133,6 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
 
             mOutputText = (TextView) findViewById(R.id.outputText);
             l = (ListView) findViewById(R.id.myListView);
-            //            l.setSelector(android.R.drawable.list_selector_background);
-            l.setSelector(android.R.drawable.star_big_on);
-
             c = (CardView) findViewById(R.id.myCardView);
 
             ViewGroup vg = (ViewGroup) l.getParent();
@@ -151,10 +148,12 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
                 Log.i("LOGMESSAGE", String.valueOf(savedSpinnerPosition));
                 ((Spinner) findViewById(R.id.spinner)).setSelection(savedSpinnerPosition);
                 new MakeDatabaseRequestTask(savedSpinnerPosition).execute();
+
                 ((ListView) findViewById(R.id.myListView)).setSelection(savedListPosition);
                 ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
                 ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
                 ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
+
             }
             else if (!Intent.ACTION_MAIN.equals(i.getAction()))
             {
@@ -295,6 +294,7 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
                             l.smoothScrollToPosition(position);
                             l.setSelection(position);
                             l.setItemChecked(position, true);
+                            l.setSelected(true);
 //                            l.setPointerIcon();
                         }
                         Log.i("LOGMESSAGE", "OnTick");
@@ -304,6 +304,7 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
                     public void onFinish() {
                         Log.i("LOGMESSAGE", "OnFinish");
                         spinning = false;
+//                        c.setContentPadding(0,0, 0, 0);
                         FloatingActionButton f = (FloatingActionButton) findViewById(R.id.refreshDB);
                         f.setImageResource(R.mipmap.goicon);
                     }
@@ -322,7 +323,7 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
                     Log.i("LOGMESSAGE", "Stopped!");
 
                 } else {
-                    c.setContentPadding(0,200, 0, 200);
+                    c.setContentPadding(0,275, 0, 275);
                     f.setImageResource(R.mipmap.stopicon);
                     countDown.start();
                     Log.i("LOGMESSAGE", "Started!");
