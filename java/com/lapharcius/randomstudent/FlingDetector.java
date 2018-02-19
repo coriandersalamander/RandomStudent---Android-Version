@@ -65,6 +65,12 @@ public class FlingDetector extends GestureDetector{
 
     }
 
+    @Override
+    public void setContextClickListener(OnContextClickListener onContextClickListener) {
+        super.setContextClickListener(onContextClickListener);
+
+    }
+
     public interface OnGestureDetected {
 
         /**
