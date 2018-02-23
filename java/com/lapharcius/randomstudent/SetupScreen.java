@@ -82,14 +82,10 @@ public class SetupScreen extends Activity
     ListView savedListView;
     TextView mExceptionText;
 
-    Spinner spinner;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null)
-        {   Log.i("LOGMESSAGE", "blablldldlfllf");}
         setContentView(R.layout.activity_main);
         
         // First, let's register a BroadcastReceiver to track network connection changes.
@@ -108,28 +104,12 @@ public class SetupScreen extends Activity
         // Used to show Exception text when debugging faulty logic.
         mExceptionText = (TextView) findViewById(R.id.outputText);
 
-//        database = studentsDatabase.getInstance(this);
-//        database.createDB();
-
-/*        if (database.countItems() != 0) {
-            Intent i = new Intent(MainActivity.this, displayStudents.class);
-            String fileName = getPreferences(Context.MODE_PRIVATE)
-                    .getString(PREF_FILE_NAME, null);
-            unregisterReceiver(networkChangeReceiver);
-
-            i.putExtra("fileName", fileName);
-            i.putExtra("loginName", mCredential.getSelectedAccountName());
-            startActivityForResult(i, REQUEST_DISPLAY_STUDENTS);
-        }
-*/
         if (savedInstanceState != null && mSavedFilenames != null)
         {
             // Add the previously saved filenames to our current ListView.
             mFilenames = (ListView) findViewById(R.id.myListView);
-            List < String > output = mSavedFilenames;
-            // Consider using mSavedFilenames here instead of local "output" List.
             ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
-                    android.R.layout.simple_list_item_1, android.R.id.text1, output);
+                    android.R.layout.simple_list_item_1, android.R.id.text1, mSavedFilenames);
             mFilenames.setAdapter(adapter);
             mFilenames.setEnabled(true);
         }
@@ -147,11 +127,7 @@ public class SetupScreen extends Activity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                SharedPreferences settings =
-                        getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString(PREF_FILE_NAME, parent.getItemAtPosition(position).toString());
-                editor.apply();
+                setPreference(PREF_FILE_NAME, parent.getItemAtPosition(position).toString());
 
                 Intent i = new Intent(SetupScreen.this, DisplayStudents.class);
 
@@ -172,25 +148,12 @@ public class SetupScreen extends Activity
         setUpFloatingButton();
     }
 
-
-    @Override
-    public void onBackPressed() {
-        // This "moveTaskToBack" logic might be a bug. I don't like to modify Google/Android's
-        // default behavior, but for reasons I don't understand, Android calls OnDestroy when the
-        // back button is pressed. For every activity other than the main screen, I can understand
-        // this mentality. However, from the main screen, the back button should stick the app into
-        // the background.
-
-        moveTaskToBack(false);
-    }
-
     @Override
     protected void onPause() {
         // This is obvious, but we don't want to constantly listening for changes in network. This
         // could end up consuming resources. So, when paused, we unregister.
 
         super.onPause();
-        Log.i("LOGMESSAGE", "OnPause");
         savedListView = mFilenames;
         unregisterReceiver(networkChangeReceiver);
 
@@ -205,25 +168,8 @@ public class SetupScreen extends Activity
         super.onResume();
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         networkChangeReceiver = new NetworkReceiver();
-        this.registerReceiver(networkChangeReceiver, filter);
+        registerReceiver(networkChangeReceiver, filter);
         mFilenames = savedListView ;
-    }
-
-    @Override
-    protected void onDestroy() {
-        // Again, we don't want to constantly listening for changes in network, which could end up// consuming resources. So, when the activity is destroyed, we unregister. On create, we
-        // reregister.
-        //
-        // To do - I would like to modify this to ***not*** unregister when a change in orientation
-        // occurs. I don't know yet how to determine whether this onDestroy was called due to
-        // killing the app vs. a change in orientation.
-
-        // To fix this, perhaps I should unregister on onStop???
-        //
-        super.onDestroy();
-//        if (networkChangeReceiver != null){
-//            unregisterReceiver(networkChangeReceiver);
-//        }
     }
 
     @Override
@@ -320,6 +266,7 @@ public class SetupScreen extends Activity
 
         if (id == R.id.nav_GoogleLogin) {
             getResultsFromApi();
+            Spinner spinner = (Spinner) findViewById(R.id.spinner);
             spinner.setVisibility(View.GONE);
             TextView t = (TextView)findViewById(R.id.periodTextField);
             t.setVisibility(View.GONE);
@@ -327,11 +274,7 @@ public class SetupScreen extends Activity
         } else if (id == R.id.nav_GoogleLogout) {
 
             if (mCredential.getSelectedAccountName() != null) {
-                SharedPreferences settings =
-                        getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString(PREF_ACCOUNT_NAME, null);
-                editor.apply();
+                setPreference(PREF_ACCOUNT_NAME, null);
                 mCredential.setSelectedAccountName(null);
             }
 
@@ -490,12 +433,24 @@ public class SetupScreen extends Activity
     }
 
     void setUpExampleSpinnerData() {
-        spinner = (Spinner) findViewById(R.id.spinner);
+        Spinner spinner = (Spinner) findViewById(R.id.spinner);
         spinner.setEnabled(false);
 
-        Cursor cursor = studentsDatabase.getDatabase().query(true, "students", new String[]{"_id", "period"}, null, null, null, null, null, null);
+        Cursor cursor = studentsDatabase.getDatabase().query(
+                true,
+                "students",
+                new String[]{"_id", "period"},
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
         if (cursor.getCount() == 0) {
-            a = ArrayAdapter.createFromResource(this, R.array.example_periods, android.R.layout.simple_spinner_item);
+            a = ArrayAdapter.createFromResource(
+                    this,
+                    R.array.example_periods,
+                    android.R.layout.simple_spinner_item);
             a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(a);
         }
@@ -507,12 +462,10 @@ public class SetupScreen extends Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i("LOGMESSAGE", "onActivityResult");
         switch (requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
                     mExceptionText.setText(R.string.requires_google_play_services_string);
-                } else {
                 }
                 break;
             case REQUEST_ACCOUNT_PICKER:
@@ -521,11 +474,7 @@ public class SetupScreen extends Activity
                     String accountName =
                             data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        SharedPreferences settings =
-                                getPreferences(Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putString(PREF_ACCOUNT_NAME, accountName);
-                        editor.apply();
+                        setPreference(PREF_ACCOUNT_NAME, accountName);
                         mCredential.setSelectedAccountName(accountName);
                         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
                         myToolbar.setTitle(getResources().getText(R.string.actionBarTitle) + " - " + mCredential.getSelectedAccountName());
@@ -540,14 +489,12 @@ public class SetupScreen extends Activity
                 }
                 break;
             case REQUEST_DISPLAY_STUDENTS:
-                Log.i("LOGMESSAGE", "OnActivityResult");
                 setUpExampleTableData();
                 setUpExampleSpinnerData();
                 mFilenames.setEnabled(false);
                 break;
             default:
         }
-
     }
 
     /**
@@ -568,6 +515,13 @@ public class SetupScreen extends Activity
         dialog.show();
     }
 
+    private void setPreference(String prefName, String prefValue) {
+        SharedPreferences settings =
+                getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(prefName, prefValue);
+        editor.apply();
+    }
 
     /**
      * An asynchronous task that handles the Google Sheets API call.
@@ -650,7 +604,6 @@ public class SetupScreen extends Activity
 
             return fileInfo;
         }
-
 
         @Override
         protected void onPreExecute ()

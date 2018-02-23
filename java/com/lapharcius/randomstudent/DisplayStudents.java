@@ -19,10 +19,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,7 +50,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.widget.Adapter.NO_SELECTION;
+import static android.widget.RelativeLayout.CENTER_HORIZONTAL;
+import static android.widget.RelativeLayout.CENTER_VERTICAL;
 import static com.lapharcius.randomstudent.FlingDetector.flingDirection.DIRECTION_LEFT;
 import static com.lapharcius.randomstudent.FlingDetector.flingDirection.DIRECTION_RIGHT;
 import static java.lang.Thread.sleep;
@@ -90,13 +93,13 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
         database = studentsDatabase.getInstance(this);
         database.createDB();
 
-        if (getResources().getConfiguration().screenWidthDp > getResources().getConfiguration().screenHeightDp) {
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE)  {
             setContentView(R.layout.activity_display_students_landscape);
         } else {
             setContentView(R.layout.activity_display_students_portrait);
         }
         periods = new Vector<>(0);
-        gridIds = new HashMap<>(5);
+        gridIds = new HashMap<>(0);
 
         g = new FlingDetector(getApplicationContext());
 
@@ -135,51 +138,51 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
             l = (ListView) findViewById(R.id.myListView);
             c = (CardView) findViewById(R.id.myCardView);
 
-            ViewGroup vg = (ViewGroup) l.getParent();
-            vg.removeView(l);
+            RelativeLayout.LayoutParams lp =
+                    new RelativeLayout.LayoutParams(
+                            getResources().getConfiguration().screenWidthDp,
+                            getResources().getConfiguration().screenHeightDp);
 
-            c.addView(l);
-            c.setRadius((float) 500.0);
+            lp.addRule(CENTER_HORIZONTAL);
+            lp.addRule(CENTER_VERTICAL);
+            l.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            c.setLayoutParams(lp);
+
+            // The conversion of dp units to screen pixels is simple: px = dp * (dpi / 160)
+            // Since the getResources().getConfiguration().screenWidthDp and screenHeightDp are in
+            // dp units, and the radius is in pixels, we must convert the two values to pixels and
+            // find the minimum.
+            float minScreenDp = Math.min(
+                    getResources().getConfiguration().screenWidthDp,
+                    getResources().getConfiguration().screenHeightDp) * .5f;
+
+            c.setRadius(
+                    (minScreenDp *
+                    (getResources().getDisplayMetrics().densityDpi / 160)) - 16);
 
             setupFloatingButton();
-
+            ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
+            ((ListView) findViewById(R.id.myListView)).addFooterView(new View(this));
 
             if (savedInstanceState != null) {
                 Log.i("LOGMESSAGE", String.valueOf(savedSpinnerPosition));
                 ((Spinner) findViewById(R.id.spinner)).setSelection(savedSpinnerPosition);
                 new MakeDatabaseRequestTask(savedSpinnerPosition).execute();
-
                 ((ListView) findViewById(R.id.myListView)).setSelection(savedListPosition);
-                ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
-                ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
-                ((ListView) findViewById(R.id.myListView)).addHeaderView(new View(this));
-
             }
             else if (!Intent.ACTION_MAIN.equals(i.getAction()))
             {
-                // This delete/create method calls seem correct to me. Why does this not work?
-                // Experiment: Try with "savedInstanceState == null" check.
-//                        studentsDatabase.getInstance(this).deleteDatabase("students.db");
-//                        studentsDatabase.getInstance(this).createDB();
                 populateDatabase();
             }
             else
             {
                 queryDatabase();
-        /*                View headerView = getLayoutInflater().inflate(android.R.layout.simple_list_item_1,null);
-                        l.addHeaderView(headerView);
-                        l.addHeaderView(headerView);
-
-                        l.addFooterView(headerView);
-                        l.addFooterView(headerView);
-        */
             }
         }
     }
 
     @Override
     public void onOptionsMenuClosed(Menu menu) {
-        Log.i("LOGMESSAGE", "In onOptionsMenuClosed");
         super.onOptionsMenuClosed(menu);
     }
 
@@ -290,21 +293,17 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
                     public void onTick(long millisUntilFinished) {
                         if (spinning) {
                             int position = (int) (Math.random() * 100 % (l.getCount() - 1));
-//                            int position = l.getCount() - 1;
                             l.smoothScrollToPosition(position);
-                            l.setSelection(position);
-                            l.setItemChecked(position, true);
-                            l.setSelected(true);
-//                            l.setPointerIcon();
                         }
-                        Log.i("LOGMESSAGE", "OnTick");
                     }
 
                     @Override
                     public void onFinish() {
-                        Log.i("LOGMESSAGE", "OnFinish");
+                        if (spinning) {
+                            int position = (int) (Math.random() * 100 % (l.getCount() - 1));
+                            l.setSelection(position);
+                        }
                         spinning = false;
-//                        c.setContentPadding(0,0, 0, 0);
                         FloatingActionButton f = (FloatingActionButton) findViewById(R.id.refreshDB);
                         f.setImageResource(R.mipmap.goicon);
                     }
@@ -312,21 +311,15 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
 
                 spinning = !spinning;
                 if (!spinning) {
-//                    c.setContentPadding(0,0, 0, 0);
                     f.setImageResource(R.mipmap.goicon);
+                    int position = (int) (Math.random() * 100 % (l.getCount() - 1));
+                    l.setSelection(position);
                     countDown.cancel();
-//                    l.setFocusableInTouchMode(true);
                     savedListPosition = l.getSelectedItemPosition();
-                    l.setSelection(savedListPosition);
-                    l.setItemChecked(savedListPosition, true);
-//                    l.setFilterText("JOJOJOJOJO");
-                    Log.i("LOGMESSAGE", "Stopped!");
 
                 } else {
-                    c.setContentPadding(0,275, 0, 275);
                     f.setImageResource(R.mipmap.stopicon);
                     countDown.start();
-                    Log.i("LOGMESSAGE", "Started!");
 
                 }
             }
@@ -441,8 +434,9 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
             super.onPostExecute(strings);
             l = (ListView) findViewById(R.id.myListView);
             ArrayAdapter<String> listAdapter = new ArrayAdapter<>(getApplicationContext(),
-                    android.R.layout.simple_list_item_1, android.R.id.text1, strings);
+                    R.layout.list_item, android.R.id.text1, strings);
             l.setAdapter(listAdapter);
+            l.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             Spinner s = (Spinner) findViewById(R.id.spinner);
             s.setEnabled(true);
 //            s.setSelected(true);
@@ -599,13 +593,6 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
             l = (ListView) findViewById(R.id.myListView);
             l.setAdapter(listAdapter);
             savedOutput = new ArrayList<>(output);
-
-/*            for (String tempRow : output)
-            {
-                Log.i("LOGMESSAGE", tempRow);
-            }
-*/
-//            spinner.setEnabled(true);
 
             Spinner spinner = (Spinner) findViewById(R.id.spinner);
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getApplicationContext(),
