@@ -294,6 +294,7 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
                         if (spinning) {
                             int position = (int) (Math.random() * 100 % (l.getCount() - 1));
                             l.smoothScrollToPosition(position);
+                            l.setSelection(position);
                         }
                     }
 
@@ -365,6 +366,7 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
                 }
             }
 
+            Log.i("LOGMESSAGE", "Period == " + aPeriod);
             if (periods.size() != 0)
 
             {
@@ -589,7 +591,10 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
         @Override
         protected void onPostExecute(List<String> output) {
             ArrayAdapter<String> listAdapter = new ArrayAdapter<>(getApplicationContext(),
-                    android.R.layout.simple_list_item_1, android.R.id.text1, output);
+                    R.layout.list_item, android.R.id.text1, output);
+
+//            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(getApplicationContext(),
+//                    android.R.layout.simple_list_item_1, android.R.id.text1, output);
             l = (ListView) findViewById(R.id.myListView);
             l.setAdapter(listAdapter);
             savedOutput = new ArrayList<>(output);
@@ -598,16 +603,19 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getApplicationContext(),
                     R.layout.spinner_dropdown_item, periods);
             spinner.setAdapter(spinnerAdapter);
-//            for (int i = 0; i < periods.size(); ++i) {
-//                Log.i("sheetresult", periods.elementAt(i) + "\n");
-//                if (output.size() == 0) {
-//                    mOutputText.setText(R.string.no_results_returned);
-//                } else {
-//                    output.add(0, "Data retrieved using the Sheets API:");
-//                    l = (ListView) findViewById(R.id.myListView);
-
-//                }
-//            }
+            spinner.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
+                    {
+                        new MakeDatabaseRequestTask(i).execute();
+                        adapterView.setSelection(i);
+                    }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        //Do Nothing.
+                    }
+                });
         }
 
         @SuppressWarnings("StatementWithEmptyBody")

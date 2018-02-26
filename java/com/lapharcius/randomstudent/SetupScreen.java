@@ -296,7 +296,13 @@ public class SetupScreen extends Activity
     }
 
     void enableDrawerOptions() {
-        if (mCredential.getSelectedAccountName() != null) {
+        String accountName = getPreferences(Context.MODE_PRIVATE)
+                .getString(PREF_ACCOUNT_NAME, null);
+        Log.i("LOGMESSAGE", "ACCOUNT name == " + accountName);
+
+        if (getPreferences(Context.MODE_PRIVATE)
+                .getString(PREF_ACCOUNT_NAME, null) != null)
+        {
             NavigationView n = (NavigationView) findViewById(R.id.nav_view);
             Menu m = n.getMenu();
             MenuItem mi = m.findItem(R.id.nav_GoogleLogin);
@@ -387,6 +393,7 @@ public class SetupScreen extends Activity
                     .getString(PREF_ACCOUNT_NAME, null);
             if (accountName != null) {
                 mCredential.setSelectedAccountName(accountName);
+                setPreference(PREF_ACCOUNT_NAME, accountName);
                 Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
                 myToolbar.setTitle(getResources().getText(R.string.actionBarTitle) + " - " + mCredential.getSelectedAccountName());
                 new MakeDriveRequestTask(mCredential).execute();
@@ -521,6 +528,8 @@ public class SetupScreen extends Activity
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(prefName, prefValue);
         editor.apply();
+        enableDrawerOptions();
+
     }
 
     /**
