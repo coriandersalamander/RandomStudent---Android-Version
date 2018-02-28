@@ -236,7 +236,8 @@ public class SetupScreen extends Activity
         if (!googlePlayServicesAreAvailable()) {
             acquireGooglePlayServices();
         } else if (!isDeviceOnline()) {
-            mExceptionText.setText(R.string.no_connection_available);
+            mExceptionText.setText(
+                    getResources().getString(R.string.no_connection_available));
         } else if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
         } else {
@@ -298,7 +299,6 @@ public class SetupScreen extends Activity
     void enableDrawerOptions() {
         String accountName = getPreferences(Context.MODE_PRIVATE)
                 .getString(PREF_ACCOUNT_NAME, null);
-        Log.i("LOGMESSAGE", "ACCOUNT name == " + accountName);
 
         if (getPreferences(Context.MODE_PRIVATE)
                 .getString(PREF_ACCOUNT_NAME, null) != null)
@@ -472,7 +472,8 @@ public class SetupScreen extends Activity
         switch (requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
-                    mExceptionText.setText(R.string.requires_google_play_services_string);
+//                    mExceptionText.setText(R.string.requires_google_play_services_string);
+                    mExceptionText.setText(getResources().getText(R.string.requires_google_play_services_string));
                 }
                 break;
             case REQUEST_ACCOUNT_PICKER:
@@ -625,7 +626,7 @@ public class SetupScreen extends Activity
         @Override
         protected void onPostExecute (List < String > output) {
             if (output == null || output.size() == 0) {
-                mExceptionText.setText(R.string.no_results_returned);
+                mExceptionText.setText(getResources().getString(R.string.no_results_returned));
             } else {
                 mFilenames = (ListView) findViewById(R.id.myListView);
 
@@ -651,10 +652,12 @@ public class SetupScreen extends Activity
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
                             REQUEST_AUTHORIZATION);
                 } else {
-                    mExceptionText.setText(String.valueOf(R.string.error_message + mLastError.getMessage()));
+                    mExceptionText.setText(
+                            getResources().getString(R.string.error_message) + " " +
+                                    mLastError.getMessage());
                 }
             } else {
-                mExceptionText.setText(R.string.request_cancelled);
+                mExceptionText.setText(getResources().getString(R.string.request_cancelled));
             }
         }
     }
