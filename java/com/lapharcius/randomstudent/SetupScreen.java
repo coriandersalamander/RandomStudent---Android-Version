@@ -37,6 +37,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+//import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAuthIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAuthIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.http.HttpTransport;
@@ -256,6 +258,7 @@ public class SetupScreen extends Activity
                 GoogleApiAvailability.getInstance();
         final int connectionStatusCode =
                 apiAvailability.isGooglePlayServicesAvailable(this);
+        Log.i("LOGMESSAGE", "In googlePlayServicesAreAvailable returns " + String.valueOf(connectionStatusCode == ConnectionResult.SUCCESS));
         return connectionStatusCode == ConnectionResult.SUCCESS;
     }
 
@@ -643,7 +646,7 @@ public class SetupScreen extends Activity
         protected void onCancelled ()
         {
             if (mLastError != null) {
-                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException )  {
                     showGooglePlayServicesAvailabilityErrorDialog(
                             ((GooglePlayServicesAvailabilityIOException) mLastError)
                                     .getConnectionStatusCode());
@@ -651,10 +654,13 @@ public class SetupScreen extends Activity
                     startActivityForResult(
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
                             REQUEST_AUTHORIZATION);
-                } else {
+                } else if (mLastError instanceof GoogleAuthIOException) {
                     mExceptionText.setText(
-                            getResources().getString(R.string.error_message) + " " +
-                                    mLastError.getMessage());
+                            ((GoogleAuthIOException) mLastError).getCause().toString());
+                }else {
+                    mExceptionText.setText(
+                        getResources().getString(R.string.error_message) + " " +
+                                mLastError.getMessage());
                 }
             } else {
                 mExceptionText.setText(getResources().getString(R.string.request_cancelled));
