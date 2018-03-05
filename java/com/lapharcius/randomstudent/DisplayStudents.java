@@ -103,8 +103,6 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
         gridIds = new HashMap<>(0);
 
         g = new GestureDetector(this, new FlingDetector(this));
-//        g.setGestureListener(this);
-
 
         Intent i = getIntent();
 
@@ -201,58 +199,6 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
     protected void onDestroy() {
         super.onDestroy();
 //        getLayoutInflater().setFactory(null);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_menu, menu);
-        if (getLayoutInflater().getFactory() == null) {
-            getLayoutInflater().setFactory(new LayoutInflater.Factory() {
-                @Override
-                public View onCreateView(String name, Context context, AttributeSet attrs) {
-                    try {
-                        try {
-                            final LayoutInflater menuItem = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                            if (menuItem != null)
-                            {
-                                final View menuView = menuItem.createView(name, null, attrs);
-                                new Handler().post(new Runnable() {
-                                    public void run() {
-                                        try {
-                                            menuView.setBackgroundColor((Color.GRAY));
-//                                        SpannableString s = new SpannableString(getResources().getString(R.string.set_up_new_roster));
-//                                        s.setSpan(new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER), 0, s.length(), 0);
-//                                        menuItem.set
-//                                        menuView.setBackgroundResource(android.R.drawable.star_big_on);
-                                        } catch (Exception e) {
-                                            Log.i("LOGMESSAGE", "Error Setting Text Color: " + e.getMessage());
-                                        }
-                                    }
-                                });
-                                return menuView;
-                            }
-                        } catch (InflateException e) {
-                            Log.i("LOGMESSAGE", "View inflater error: " + e.getMessage());
-                        }
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-            });
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i("LOGMESSAGE", "In onOptionsItemSelected!!");
-//        if (item.get)
-        Toast.makeText(getApplicationContext(), "Swipe for setup screen", Toast.LENGTH_LONG).show();
-        Intent i = new Intent(this, SetupScreen.class);
-        startActivity(i);
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

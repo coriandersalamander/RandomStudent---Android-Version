@@ -40,11 +40,6 @@ public class FlingDetector extends GestureDetector.SimpleOnGestureListener{
 //                return onFling(e1, e2, velocityX, velocityY);
     }
 
-    public void setGestureListener(OnGestureDetected g)
-    {
-//        mListener = g;
-    }
-
     public interface OnGestureDetected {
 
         /**
