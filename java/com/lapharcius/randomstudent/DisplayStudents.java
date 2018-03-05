@@ -13,6 +13,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -82,7 +83,7 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
     static List<String> savedOutput;
     ListView savedListView;
 //    GestureDetector g;
-    FlingDetector g;
+    GestureDetector g;
     GoogleAccountCredential mCredential;
     studentsDatabase database;
 
@@ -101,7 +102,9 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
         periods = new Vector<>(0);
         gridIds = new HashMap<>(0);
 
-        g = new FlingDetector(getApplicationContext());
+        g = new GestureDetector(this, new FlingDetector(this));
+//        g.setGestureListener(this);
+
 
         Intent i = getIntent();
 
@@ -179,6 +182,14 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
                 queryDatabase();
             }
         }
+        Toast.makeText(getApplicationContext(),
+                "Swipe screen to set up new data.",
+                Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return (g.onTouchEvent(event));
     }
 
     @Override
@@ -253,16 +264,20 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Toast.makeText(getApplicationContext(),
+                "Swipe screen to set up new data.",
+                Toast.LENGTH_LONG).show();
+
+    }
+
+    @Override
     protected void onPause()
     {
         super.onPause();
         savedListView = l;
 
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return g.onTouchEvent(event);
     }
 
     @Override
@@ -337,16 +352,19 @@ public class DisplayStudents extends Activity implements FlingDetector.OnGesture
     }
 
     @Override
-    public boolean onGestureDetected() {
+    public boolean onSwipe(FlingDetector f) {
+
+        Log.i("LOGMESSAGE", "In onGestureDetected.");
+        Log.i("LOGMESSAGE", "Fling Direction == " + FlingDetector.currentFlingDirection);
+
         if ((FlingDetector.currentFlingDirection == DIRECTION_LEFT) ||
             (FlingDetector.currentFlingDirection == DIRECTION_RIGHT))
         {
             Intent i = new Intent(getApplicationContext(), SetupScreen.class);
             startActivity(i);
         }
-        return false;
+        return true;
     }
-
 
     private class MakeDatabaseRequestTask extends AsyncTask<Void, Void, List<String>>
     {
